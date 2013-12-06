@@ -10,10 +10,12 @@ class ThrustConfig
 
   def initialize(relative_project_root, config, xcrun)
     @project_root = File.expand_path(relative_project_root)
-    @build_dir = File.join(project_root, 'build')
+    relative_build_dir = config['build_dir'] ? config['build_dir'] : 'build'
+    @build_dir = File.join(project_root, relative_build_dir)
     @config = config
     @xcrun = xcrun
     verify_configuration(@config)
+    fill_in_configuration_defaults(@config)
   end
 
   def get_app_name_from(build_dir)
@@ -76,14 +78,37 @@ class ThrustConfig
   def run_cedar(build_configuration, target, sdk, device)
     binary = config['sim_binary']
     sim_dir = File.join(build_dir, "#{build_configuration}-iphonesimulator", "#{target}.app")
-    if binary =~ /waxim%/
-      grep_cmd_for_failure(%Q[#{binary} -s #{sdk} -f #{device} -e CFFIXED_USER_HOME=#{Dir.tmpdir} -e CEDAR_HEADLESS_SPECS=1 -e CEDAR_REPORTER_CLASS=CDRDefaultReporter #{sim_dir}])
+
+    reporter_classes = "CDRDefaultReporter"
+    reporter_classes += ",CDRJUnitXMLReporter" if config['spec_reports_dir']
+    env_vars = {
+      'CFFIXED_USER_HOME' => "#{Dir.tmpdir}",
+      'CEDAR_HEADLESS_SPECS' => 1,
+      'CEDAR_REPORTER_CLASS' => reporter_classes
+    }
+    env_vars['CEDAR_JUNIT_XML_FILE'] = spec_results_file(target) if config['spec_reports_dir']
+
+    if binary =~ /waxsim$/
+      command = [ binary, "-s #{sdk} -f #{device}" ]
+      env_vars.each do |k, v|
+        command << "-e #{k}=#{v}"
+      end
+      command << "#{sim_dir}"
     elsif binary =~ /ios-sim$/
-      grep_cmd_for_failure(%Q[#{binary} launch #{sim_dir} --sdk #{sdk} --family #{device} --retina --tall --setenv CFFIXED_USER_HOME=#{Dir.tmpdir} --setenv CEDAR_HEADLESS_SPECS=1 --setenv CEDAR_REPORTER_CLASS=CDRDefaultReporter])
+      command = [ binary, "launch #{sim_dir}", "--sdk #{sdk} --family #{device} --retina --tall" ]
+      env_vars.each do |k, v|
+        command << "--setenv #{k}=#{v}"
+      end
     else
       puts "Unknown binary for running specs: '#{binary}'"
       exit(1)
     end
+
+    grep_cmd_for_failure(command.join(" "))
+  end
+
+  def spec_results_file(target)
+    "#{project_root}/#{config['spec_reports_dir']}/#{target}.xml"
   end
 
   def update_version(release)
@@ -138,12 +163,19 @@ class ThrustConfig
   attr_reader :xcrun
 
   def run_xcode(build_command, build_configuration, sdk = nil, target = nil)
+    if (config['use_workspace'] && target)
+      project_selector = "-workspace \"#{config['project_name']}.xcworkspace\""
+      target_selector = "-scheme #{target}"
+    else
+      project_selector = "-project \"#{config['project_name']}.xcodeproj\""
+      target_selector = target ? "-target #{target}" : "-alltargets"
+    end
     system_or_exit(
       [
         "set -o pipefail &&",
         "xcodebuild",
-        "-project #{config['project_name']}.xcodeproj",
-        target ? "-target #{target}" : "-alltargets",
+        project_selector,
+        target_selector,
         "-configuration #{build_configuration}",
         sdk ? "-sdk #{sdk}" : "",
         "#{build_command}",
@@ -184,6 +216,12 @@ class ThrustConfig
     config['thrust_version'] ||= 0
     if config['thrust_version'] < THRUST_VERSION
       fail "Invalid configuration. Have you updated thrust recently? Your thrust.yml specifies version #{config['thrust_version']}, but thrust is at version #{THRUST_VERSION} see README for details."
+    end
+  end
+
+  def fill_in_configuration_defaults(config)
+    config['spec_targets'].each do |task_name, info|
+      info['device'] ||= 'iphonesimulator'
     end
   end
 end

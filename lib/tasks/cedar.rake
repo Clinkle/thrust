@@ -46,16 +46,18 @@ task :clean do
   end
 end
 
-@thrust.config['spec_targets'].each do |task_name, info|
-  desc "Run #{info['name']}"
-  task task_name do
-    build_configuration = info['configuration']
-    target = info['target']
-    sdk = info['sdk']
+namespace :specs do
+  @thrust.config['spec_targets'].each do |task_name, info|
+    desc "Run #{info['name']}"
+    task task_name do
+      build_configuration = info['configuration']
+      target = info['target']
+      sdk = info['sdk']
 
-    @thrust.xcode_clean(build_configuration)
-    @thrust.xcode_build(build_configuration, 'iphonesimulator', target)
-    @thrust.run_cedar(build_configuration, target, sdk, info['device'])
+      @thrust.xcode_clean(build_configuration)
+      @thrust.xcode_build(build_configuration, 'iphonesimulator', target)
+      @thrust.run_cedar(build_configuration, target, sdk, info['device'])
+    end
   end
 end
 
