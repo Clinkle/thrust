@@ -33,7 +33,9 @@ end
 desc "Print out names of files containing focused specs"
 task :focused_specs do
   pattern = focused_methods.join("\\|")
-  directories = @thrust.config['spec_targets'].values.map {|h| h['target']}.join(' ')
+  directories = @thrust.config['spec_targets'].values.map {|h|
+    h['path'] ? h['path'] : h['target']
+  }.join(' ')
   @thrust.system_or_exit %Q[ grep -l -r -e "\\(#{pattern}\\)" #{directories} | grep -v 'Frameworks' ; exit 0 ]
 end
 
