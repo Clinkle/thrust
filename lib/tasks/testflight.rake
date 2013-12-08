@@ -2,7 +2,60 @@ require 'yaml'
 require File.expand_path('../../thrust_config', __FILE__)
 require File.expand_path('../../ipa_re_signer', __FILE__)
 require 'tempfile'
+require 'date'
 
+class VersionNumber
+  include Comparable
+  attr_accessor :number
+
+  def initialize(number)
+    @number = number
+  end
+
+  def self.fromDate(date)
+    major = (date.year - 2011)
+    minor = date.month
+    monday_based_wday = (date.wday + 7 - 1) % 7
+    previous_monday = date.mday - monday_based_wday
+    patch = (previous_monday / 7.0).ceil
+    subpatch = (((date.wday + 7) - 1) % 7)
+    extra = 0
+    self.new([major, minor, patch, subpatch, extra].join('.'))
+  end
+
+  def <=>(another_version)
+    my_subversions = self.number.split('.')
+    their_subversions = another_version.number.split('.')
+    i_max = [my_subversions.count, their_subversions.count].max
+    (0..i_max).each do |i|
+      my_sub = my_subversions[i] || 0
+      my_sub = my_sub.to_i
+      their_sub = their_subversions[i] || 0
+      their_sub = their_sub.to_i
+      return my_sub <=> their_sub unless my_sub == their_sub
+    end
+    return 0
+  end
+
+  def to_s
+    "Version Number #{@number}"
+  end
+
+  def make_minimum_greater_than(other)
+    original_digits = self.number.split('.')
+    (1..original_digits.length).each do |num_digits|
+      self.number = (original_digits[0...num_digits]).join('.')
+      break if other < self
+    end
+    self
+  end
+
+  def increment_last
+    *head, last = self.number.split('.')
+    head << (last + 1)
+    self.number = head.join('.')
+  end
+end
 
 @thrust = ThrustConfig.make(Dir.getwd, File.join(Dir.getwd, 'thrust.yml'))
 
@@ -15,24 +68,14 @@ namespace :bump do
   desc 'Bumps the build'
   task :build do
     @thrust.run_git_with_message 'Bumped build to $(agvtool what-version -terse)' do
-      @thrust.system_or_exit 'agvtool bump -all'
-    end
-  end
-
-  namespace :version do
-    desc 'Bumps the major marketing version in (major.minor.patch)'
-    task :major do
-      @thrust.update_version(:major)
-    end
-
-    desc 'Bumps the minor marketing version in (major.minor.patch)'
-    task :minor do
-      @thrust.update_version(:minor)
-    end
-
-    desc 'Bumps the patch marketing version in (major.minor.patch)'
-    task :patch do
-      @thrust.update_version(:patch)
+      current_version_string = `agvtool what-version -terse`.chomp
+      current_version = VersionNumber.new(current_version_string)
+      todays_version = VersionNumber.fromDate(Date.today)
+      todays_version.make_minimum_greater_than(current_version)
+      if todays_version == current_version
+        todays_version.increment_last
+      end
+      @thrust.new_build_version(todays_version.number)
     end
   end
 end

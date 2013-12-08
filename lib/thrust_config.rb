@@ -131,8 +131,8 @@ class ThrustConfig
     end
   end
 
-  def new_build_version(major, minor, patch)
-    version = [major, minor, patch].join(".")
+  def new_build_version(*markers)
+    version = markers.join(".")
     system_or_exit "agvtool new-marketing-version \"#{version}\""
   end
 
