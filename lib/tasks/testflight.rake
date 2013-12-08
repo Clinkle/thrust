@@ -43,6 +43,7 @@ namespace :testflight do
     task task_name, :provision_search_query do |task, args|
       @team_token = info['token']
       @distribution_list = info['default_list']
+      @target = info['target'].nil? ? @thrust.config['app_name'] : info['target']
       @configuration = info['configuration']
       @bumps_build_number = info['increments_build_number'].nil? ? true : info['increments_build_number']
       @configured = true
@@ -56,7 +57,7 @@ namespace :testflight do
     distribution_list = @distribution_list
     build_configuration = @configuration
     build_dir = @thrust.build_dir_for(build_configuration)
-    target = @thrust.config['app_name']
+    target = @target
 
     if @bumps_build_number
       Rake::Task["bump:build"].invoke
@@ -65,7 +66,7 @@ namespace :testflight do
     end
 
     STDERR.puts "Cleaning..."
-    @thrust.xcode_clean(build_configuration, 'iphoneos')
+    @thrust.xcode_clean(build_configuration)
     @thrust.system_or_exit "rm -r #{build_dir} ; exit 0"
     STDERR.puts "Killing simulator..."
     @thrust.kill_simulator
