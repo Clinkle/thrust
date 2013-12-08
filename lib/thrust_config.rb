@@ -142,8 +142,9 @@ class ThrustConfig
       block.call
     else
       check_for_clean_working_tree
-      STDERR.puts 'Checking that the master branch is up to date...'
-      system_or_exit 'git fetch && git diff --quiet HEAD origin/master'
+      current_branch = `git rev-parse --abbrev-ref HEAD`.chomp
+      STDERR.puts "Checking that the #{current_branch} branch is up to date..."
+      system_or_exit "git fetch && git diff --quiet HEAD origin/#{current_branch}"
       block.call
       system_or_exit "git commit -am \"#{message}\" && git push origin head"
     end
