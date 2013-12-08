@@ -52,7 +52,7 @@ class ThrustConfig
   end
 
   def xcode_build(build_configuration, sdk, target)
-    run_xcode('build', build_configuration, sdk, target)
+    run_xcode('clean build', build_configuration, sdk, target)
   end
 
   def xcode_clean(build_configuration)
@@ -182,7 +182,7 @@ class ThrustConfig
         "2>&1",
         "| grep -v 'backing file'"
       ].join(" "),
-        output_file("#{build_configuration}-#{build_command}")
+        output_file("#{build_configuration}-#{build_command.gsub(' ','_')}")
     )
   end
 

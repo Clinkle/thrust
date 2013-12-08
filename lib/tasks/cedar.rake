@@ -54,7 +54,6 @@ namespace :specs do
       target = info['target']
       sdk = info['sdk']
 
-      @thrust.xcode_clean(build_configuration)
       @thrust.xcode_build(build_configuration, 'iphonesimulator', target)
       @thrust.run_cedar(build_configuration, target, sdk, info['device'])
     end

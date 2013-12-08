@@ -65,9 +65,6 @@ namespace :testflight do
       @thrust.check_for_clean_working_tree
     end
 
-    STDERR.puts "Cleaning..."
-    @thrust.xcode_clean(build_configuration)
-    @thrust.system_or_exit "rm -r #{build_dir} ; exit 0"
     STDERR.puts "Killing simulator..."
     @thrust.kill_simulator
     STDERR.puts "Building..."
