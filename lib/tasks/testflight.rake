@@ -118,7 +118,7 @@ namespace :testflight do
     STDERR.puts "Packaging..."
     ipa_file = @thrust.xcode_package(build_configuration)
 
-    IpaReSigner.make(ipa_file, @thrust.config['identity'], args[:provision_search_query]).call
+    ipa_file = IpaReSigner.make(ipa_file, @thrust.config['identity'], args[:provision_search_query]).call
 
     STDERR.puts "Zipping dSYM..."
     dsym_path = "#{build_dir}/#{app_name}.app.dSYM"
