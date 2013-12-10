@@ -65,13 +65,26 @@ task :current_version do
 end
 
 namespace :bump do
-  desc 'Bumps the build'
-  task :build do
-    @thrust.run_git_with_message 'Bumped build to $(agvtool what-version -terse)' do
-      current_version_string = `agvtool what-version -terse`.chomp
+  desc 'Bumps the marketing version number'
+  task :marketing do
+    @thrust.run_git_with_message 'Bumped marketing version to $(agvtool what-marketing-version -terse)' do
+      current_version_string = `agvtool what-marketing-version -terse`.chomp
       current_version = VersionNumber.new(current_version_string)
       todays_version = VersionNumber.fromDate(Date.today)
       todays_version.make_minimum_greater_than(current_version)
+      if todays_version == current_version
+        todays_version.increment_last
+      end
+      @thrust.new_marketing_version(todays_version.number)
+    end
+  end
+
+  desc 'Bumps the build'
+  task :build do
+    @thrust.run_git_with_message 'Bumped build version to $(agvtool what-version -terse)' do
+      current_version_string = `agvtool what-version -terse`.chomp
+      current_version = VersionNumber.new(current_version_string)
+      todays_version = VersionNumber.fromDate(Date.today)
       if todays_version == current_version
         todays_version.increment_last
       end

@@ -131,9 +131,14 @@ class ThrustConfig
     end
   end
 
-  def new_build_version(*markers)
+  def new_marketing_version(*markers)
     version = markers.join(".")
     system_or_exit "agvtool new-marketing-version \"#{version}\""
+  end
+
+  def new_build_version(*markers)
+    version = markers.join(".")
+    system_or_exit "agvtool new-version \"#{version}\""
   end
 
   def run_git_with_message(message, &block)
