@@ -51,6 +51,10 @@ class ThrustConfig
     system %q[killall -m -KILL "iPhone Simulator"]
   end
 
+  def clean_simulator
+    system %q[rm -rf ~/Library/Application\ Support/iPhone\ Simulator/]
+  end
+
   def xcode_build(build_configuration, sdk, target)
     run_xcode('clean build', build_configuration, sdk, target)
   end
