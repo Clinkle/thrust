@@ -52,7 +52,7 @@ class VersionNumber
 
   def increment_last
     *head, last = self.number.split('.')
-    head << (last + 1)
+    head << (last.to_i + 1).to_s
     self.number = head.join('.')
   end
 end
