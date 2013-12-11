@@ -200,7 +200,7 @@ class ThrustConfig
     output_dir = if ENV['IS_CI_BOX']
                    ENV['CC_BUILD_ARTIFACTS']
                  else
-                   Dir.mkdir(build_dir) unless File.exists?(build_dir)
+                   FileUtils.mkpath(build_dir) unless File.exists?(build_dir)
                    build_dir
                  end
 
