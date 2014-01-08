@@ -107,6 +107,16 @@ namespace :testflight do
     end
   end
 
+  def root_build_dir
+    split = @thrust.config['build_dir'].split(File::SEPARATOR)
+    candidate = split.first
+    if candidate == "" && split.length > 1
+      return split[1]
+    else
+      return candidate
+    end
+  end
+
   task :deploy, :provision_search_query do |task, args|
     raise "You need to run a distribution configuration." unless @configured
     team_token = @team_token
@@ -121,6 +131,8 @@ namespace :testflight do
       @thrust.check_for_clean_working_tree
     end
 
+    STDERR.puts "Cleaning build directory..."
+    puts `rm -rf #{root_build_dir}`
     STDERR.puts "Killing simulator..."
     @thrust.kill_simulator
     STDERR.puts "Building..."
