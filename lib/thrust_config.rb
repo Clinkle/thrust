@@ -26,7 +26,7 @@ class ThrustConfig
   end
 
   def build_dir_for(configuration)
-    "#{build_dir}/#{configuration}-iphoneos"
+    File.join(build_dir, "#{configuration}-iphonesimulator")
   end
 
   # Xcode 4.3 stores its /Developer inside /Applications/Xcode.app, Xcode 4.2 stored it in /Developer
@@ -35,7 +35,7 @@ class ThrustConfig
   end
 
   def system_or_exit(cmd, stdout = nil)
-    STDERR.puts "Executing #{cmd}"
+    STDERR.puts "Executing #{cmd} with stdout #{stdout}"
     cmd += " >#{stdout}" if stdout
     system(cmd) or raise '******** Build failed ********'
   end
@@ -81,7 +81,7 @@ class ThrustConfig
 
   def run_cedar(build_configuration, target, sdk, device)
     binary = config['sim_binary']
-    sim_dir = File.join(build_dir, "#{build_configuration}-iphonesimulator", "#{target}.app")
+    sim_dir = File.join(build_dir_for(build_configuration), "#{target}.app")
 
     reporter_classes = "CDRDefaultReporter"
     reporter_classes += ",CDRJUnitXMLReporter" if config['spec_reports_dir']
@@ -189,6 +189,7 @@ class ThrustConfig
         "-configuration #{build_configuration}",
         sdk ? "-sdk #{sdk}" : "",
         "#{build_command}",
+        "CONFIGURATION_BUILD_DIR=#{build_dir_for(build_configuration)}",
         "2>&1",
         "| grep -v 'backing file'"
       ].join(" "),
