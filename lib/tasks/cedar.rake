@@ -52,12 +52,11 @@ namespace :specs do
     task task_name do
       build_configuration = info['configuration']
       target = info['target']
-      sdk = info['sdk']
 
       @thrust.kill_simulator
       @thrust.clean_simulator
       @thrust.xcode_build(build_configuration, 'iphonesimulator', target)
-      @thrust.run_cedar(build_configuration, target, sdk, info['device'])
+      @thrust.run_cedar(build_configuration, target, info['sdk'], info['device'])
     end
   end
 end

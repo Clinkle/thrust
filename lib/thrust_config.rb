@@ -79,7 +79,7 @@ class ThrustConfig
     xcrun.call(build_dir, app_name, config['identity'])
   end
 
-  def run_cedar(build_configuration, target, sdk, device)
+  def run_cedar(build_configuration, target, sdk, devicetype)
     binary = config['sim_binary']
     sim_dir = File.join(build_dir_for(build_configuration), "#{target}.app")
 
@@ -99,7 +99,7 @@ class ThrustConfig
       end
       command << "#{sim_dir}"
     elsif binary =~ /ios-sim$/
-      command = [ binary, "launch #{sim_dir}", "--sdk #{sdk} --family #{device} --retina --tall" ]
+      command = [ binary, "launch #{sim_dir}", "--devicetypeid \"#{devicetype}, #{sdk}\"" ]
       env_vars.each do |k, v|
         command << "--setenv #{k}=#{v}"
       end
@@ -232,7 +232,7 @@ class ThrustConfig
 
   def fill_in_configuration_defaults(config)
     config['spec_targets'].each do |task_name, info|
-      info['device'] ||= 'iphonesimulator'
+      info['device'] ||= 'com.apple.CoreSimulator.SimDeviceType.iPhone-6'
     end
   end
 end
