@@ -87,10 +87,10 @@ class ThrustConfig
     reporter_classes = "CDRDefaultReporter"
     reporter_classes += ",CDRJUnitXMLReporter" if config['spec_reports_dir']
     env_vars = {
-      'CFFIXED_USER_HOME' => "#{Dir.tmpdir}",
       'CEDAR_HEADLESS_SPECS' => 1,
       'CEDAR_REPORTER_CLASS' => reporter_classes
     }
+    env_vars['CFFIXED_USER_HOME'] = "#{Dir.tmpdir}" if config['use_fixed_user_home']
     env_vars['CEDAR_JUNIT_XML_FILE'] = spec_results_file(target) if config['spec_reports_dir']
     env_vars['CEDAR_REPORTER_OPTS'] = config['spec_reporter_opts'] if config['spec_reporter_opts']
 
