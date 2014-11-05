@@ -49,6 +49,7 @@ class ThrustConfig
     system %q[killall -m -KILL "gdb"]
     system %q[killall -m -KILL "otest"]
     system %q[killall -m -KILL "iPhone Simulator"]
+    system %q[killall -m -KILL "iOS Simulator"]
   end
 
   def clean_simulator

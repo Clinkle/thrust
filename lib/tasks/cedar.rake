@@ -46,6 +46,12 @@ task :clean do
   end
 end
 
+desc 'Kill & Clean the simulator'
+task :reset_simulator do
+  @thrust.kill_simulator
+  @thrust.clean_simulator
+end
+
 namespace :specs do
   @thrust.config['spec_targets'].each do |task_name, info|
     desc "Run #{info['name']}"
