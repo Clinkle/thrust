@@ -91,6 +91,7 @@ class ThrustConfig
       'CEDAR_REPORTER_CLASS' => reporter_classes
     }
     env_vars['CEDAR_JUNIT_XML_FILE'] = spec_results_file(target) if config['spec_reports_dir']
+    env_vars['CEDAR_REPORTER_OPTS'] = config['spec_reporter_opts'] if config['spec_reporter_opts']
 
     if binary =~ /waxsim$/
       command = [ binary, "-s #{sdk} -f #{device}" ]
