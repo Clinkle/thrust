@@ -1,4 +1,5 @@
 require File.expand_path('../xcrun', __FILE__)
+require 'open3'
 
 class ThrustConfig
   attr_reader :project_root, :config, :build_dir
@@ -213,11 +214,18 @@ class ThrustConfig
   end
 
   def grep_cmd_for_failure(cmd, output_file = nil)
-    STDERR.puts "Executing #{cmd} and checking for FAILURE"
-    result = %x[#{cmd} 2>&1]
-    STDERR.puts "Results:"
-    STDERR.puts result
-    `echo #{result} > #{output_file}` if output_file
+    STDERR.puts "Executing #{cmd} with output #{output_file} and checking for FAILURE"
+    result = ''
+    Open3.popen3("#{cmd} 2>&1") do |stdin, stdout, stderr, thread|
+      result << stdout.read
+    end
+    if output_file
+      puts "echoing result to #{output_file}"
+      File.open(output_file, 'w') {|f| f.write(result)}
+    else
+      STDERR.puts "Results:"
+      STDERR.puts result
+    end
 
     if !result.include?("Finished") || result.include?("FAILURE") || result.include?("EXCEPTION")
       exit(1)
