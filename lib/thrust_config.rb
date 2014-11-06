@@ -102,7 +102,7 @@ class ThrustConfig
       end
       command << "#{sim_dir}"
     elsif binary =~ /ios-sim$/
-      command = [ binary, "launch #{sim_dir}", "--devicetypeid \"#{devicetype}, #{sdk}\"" ]
+      command = [ binary, "launch #{sim_dir}", "--devicetypeid \"#{devicetype}, #{sdk}\"", "--stdout #{output_file(target)}" ]
       env_vars.each do |k, v|
         command << "--setenv #{k}=#{v}"
       end
@@ -112,7 +112,7 @@ class ThrustConfig
     end
 
     File.delete(spec_results_file(target)) if config['spec_reports_dir']
-    result_code = grep_cmd_for_failure(command.join(" "), output_file(target))
+    result_code = grep_cmd_for_failure(command.join(" "))
     exit(1) if config['spec_reports_dir'] && !File.exists?(spec_results_file(target))
     exit(result_code)
   end
