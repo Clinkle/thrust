@@ -111,7 +111,10 @@ class ThrustConfig
       exit(1)
     end
 
-    grep_cmd_for_failure(command.join(" "), output_file(target))
+    File.delete(spec_results_file(target)) if config['spec_reports_dir']
+    result_code = grep_cmd_for_failure(command.join(" "), output_file(target))
+    exit(1) if config['spec_reports_dir'] && !File.exists?(spec_results_file(target))
+    exit(result_code)
   end
 
   def spec_results_file(target)
@@ -228,9 +231,9 @@ class ThrustConfig
     end
 
     if !result.include?("Finished") || result.include?("FAILURE") || result.include?("EXCEPTION")
-      exit(1)
+      1
     else
-      exit(0)
+      0
     end
   end
 
