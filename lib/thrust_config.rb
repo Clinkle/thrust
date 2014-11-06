@@ -110,7 +110,7 @@ class ThrustConfig
       exit(1)
     end
 
-    grep_cmd_for_failure(command.join(" "))
+    grep_cmd_for_failure(command.join(" "), output_file(target))
   end
 
   def spec_results_file(target)
@@ -212,11 +212,12 @@ class ThrustConfig
     output_file
   end
 
-  def grep_cmd_for_failure(cmd)
+  def grep_cmd_for_failure(cmd, output_file = nil)
     STDERR.puts "Executing #{cmd} and checking for FAILURE"
     result = %x[#{cmd} 2>&1]
     STDERR.puts "Results:"
     STDERR.puts result
+    `echo #{result} > #{output_file}` if output_file
 
     if !result.include?("Finished") || result.include?("FAILURE") || result.include?("EXCEPTION")
       exit(1)
