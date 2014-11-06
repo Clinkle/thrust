@@ -195,7 +195,7 @@ class ThrustConfig
         "2>&1",
         "| grep -v 'backing file'"
       ].join(" "),
-        output_file("#{build_configuration}-#{build_command.gsub(' ','_')}")
+        output_file("#{target}-#{build_configuration}-#{build_command.gsub(' ','_')}")
     )
   end
 
