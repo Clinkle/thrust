@@ -111,7 +111,7 @@ class ThrustConfig
       exit(1)
     end
 
-    File.delete(spec_results_file(target)) if config['spec_reports_dir']
+    File.delete(spec_results_file(target)) if config['spec_reports_dir'] && File.exists?(spec_results_file(target))
     result_code = grep_cmd_for_failure(command.join(" "))
     exit(1) if config['spec_reports_dir'] && !File.exists?(spec_results_file(target))
     exit(result_code)
