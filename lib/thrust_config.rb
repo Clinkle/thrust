@@ -102,7 +102,10 @@ class ThrustConfig
       end
       command << "#{sim_dir}"
     elsif binary =~ /ios-sim$/
-      command = [ binary, "launch #{sim_dir}", "--devicetypeid \"#{devicetype}, #{sdk}\"", "--stdout #{output_file(target)}" ]
+      command = [ binary, "launch #{sim_dir}",
+        "--devicetypeid \"#{devicetype}, #{sdk}\"",
+        "--stdout #{output_file(target)}",
+        "--stderr #{output_file(target)}" ]
       env_vars.each do |k, v|
         command << "--setenv #{k}=#{v}"
       end
